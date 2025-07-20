@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Space Mission Command Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      @keyframes glow {
+        from {
+          box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        to {
+          box-shadow:
+            0 0 30px rgba(59, 130, 246, 0.8),
+            0 0 40px rgba(59, 130, 246, 0.3);
+        }
+      }
+
+      .animate-fadeIn {
+        animation: fadeIn 0.8s ease-in-out;
+      }
+      .animate-spin-slow {
+        animation: spin 3s linear infinite;
+      }
+      .animate-glow {
+        animation: glow 2s ease-in-out infinite alternate;
+      }
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      .star {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+        animation: pulse 3s ease-in-out infinite;
+      }
+
+      .comet {
+        position: absolute;
+      }
+
+      .comet-head {
+        background: #00bcd4;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #00bcd4;
+      }
+
+      .comet-tail {
+        position: absolute;
+        top: 0;
+        left: 100%;
+        height: 100%;
+        background: linear-gradient(to right, #00bcd4, transparent);
+        opacity: 0.6;
+      }
+
+      .glass-effect {
+        backdrop-filter: blur(10px);
+        background: rgba(0, 0, 0, 0.3);
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-black text-white overflow-hidden relative"
+  >
+    <!-- Animated Background -->
+    <div id="space-background" class="fixed inset-0 pointer-events-none"></div>
+
+    <!-- Navigation -->
+    <nav class="relative z-10 border-b border-white/20 glass-effect">
+      <div class="container mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="text-3xl">🌌</div>
+            <h1
+              class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent"
+            >
+              Space Mission Command
+            </h1>
+          </div>
+          <div class="hidden md:flex items-center space-x-1" id="nav-buttons">
+            <button
+              onclick="showSection('overview')"
+              class="nav-btn px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-lg"
+            >
+              <span>🚀</span><span>Mission Overview</span>
+            </button>
+            <button
+              onclick="showSection('iss')"
+              class="nav-btn px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 hover:bg-white/10 text-gray-300 hover:text-white"
+            >
+              <span>🛰️</span><span>ISS Tracker</span>
+            </button>
+            <button
+              onclick="showSection('satellites')"
+              class="nav-btn px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 hover:bg-white/10 text-gray-300 hover:text-white"
+            >
+              <span>📡</span><span>Satellites</span>
+            </button>
+            <button
+              onclick="showSection('planets')"
+              class="nav-btn px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 hover:bg-white/10 text-gray-300 hover:text-white"
+            >
+              <span>🪐</span><span>Planet Weather</span>
+            </button>
+            <button
+              onclick="showSection('asteroids')"
+              class="nav-btn px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 hover:bg-white/10 text-gray-300 hover:text-white"
+            >
+              <span>☄️</span><span>Asteroids</span>
+            </button>
+            <button
+              onclick="showSection('facts')"
+              class="nav-btn px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 hover:bg-white/10 text-gray-300 hover:text-white"
+            >
+              <span>✨</span><span>Space Facts</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile Navigation -->
+    <div class="md:hidden relative z-10 border-b border-white/20 glass-effect">
+      <div class="container mx-auto px-6 py-2">
+        <div class="flex overflow-x-auto space-x-1 pb-2" id="mobile-nav">
+          <button
+            onclick="showSection('overview')"
+            class="mobile-nav-btn px-3 py-2 rounded-lg transition-all duration-300 flex items-center space-x-1 whitespace-nowrap text-sm bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-lg"
+          >
+            <span>🚀</span><span>Overview</span>
+          </button>
+          <button
+            onclick="showSection('iss')"
+            class="mobile-nav-btn px-3 py-2 rounded-lg transition-all duration-300 flex items-center space-x-1 whitespace-nowrap text-sm hover:bg-white/10 text-gray-300 hover:text-white"
+          >
+            <span>🛰️</span><span>ISS</span>
+          </button>
+          <button
+            onclick="showSection('satellites')"
+            class="mobile-nav-btn px-3 py-2 rounded-lg transition-all duration-300 flex items-center space-x-1 whitespace-nowrap text-sm hover:bg-white/10 text-gray-300 hover:text-white"
+          >
+            <span>📡</span><span>Satellites</span>
+          </button>
+          <button
+            onclick="showSection('planets')"
+            class="mobile-nav-btn px-3 py-2 rounded-lg transition-all duration-300 flex items-center space-x-1 whitespace-nowrap text-sm hover:bg-white/10 text-gray-300 hover:text-white"
+          >
+            <span>🪐</span><span>Planets</span>
+          </button>
+          <button
+            onclick="showSection('asteroids')"
+            class="mobile-nav-btn px-3 py-2 rounded-lg transition-all duration-300 flex items-center space-x-1 whitespace-nowrap text-sm hover:bg-white/10 text-gray-300 hover:text-white"
+          >
+            <span>☄️</span><span>Asteroids</span>
+          </button>
+          <button
+            onclick="showSection('facts')"
+            class="mobile-nav-btn px-3 py-2 rounded-lg transition-all duration-300 flex items-center space-x-1 whitespace-nowrap text-sm hover:bg-white/10 text-gray-300 hover:text-white"
+          >
+            <span>✨</span><span>Facts</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="relative z-10 container mx-auto px-6 py-8">
+      <!-- Overview Section -->
+      <div id="overview-section" class="space-y-8 animate-fadeIn">
+        <div class="text-center space-y-4">
+          <h2
+            class="text-5xl md:text-7xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse"
+          >
+            SPACE MISSION CONTROL
+          </h2>
+          <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+            Real-time monitoring of space missions, satellite telemetry, and
+            cosmic phenomena. Your gateway to the infinite cosmos.
+          </p>
+        </div>
+
+        <!-- Quick Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div
+            class="bg-gradient-to-br from-blue-900/50 to-cyan-900/50 rounded-xl p-6 border border-cyan-500/30 glass-effect hover:scale-105 transition-transform duration-300"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-cyan-400 text-sm font-semibold">ISS ALTITUDE</p>
+                <p class="text-3xl font-bold" id="iss-altitude">408.0 km</p>
+              </div>
+              <div class="text-4xl">🛰️</div>
+            </div>
+          </div>
+          <div
+            class="bg-gradient-to-br from-purple-900/50 to-pink-900/50 rounded-xl p-6 border border-purple-500/30 glass-effect hover:scale-105 transition-transform duration-300"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-purple-400 text-sm font-semibold">
+                  ACTIVE SATELLITES
+                </p>
+                <p class="text-3xl font-bold">3</p>
+              </div>
+              <div class="text-4xl">📡</div>
+            </div>
+          </div>
+          <div
+            class="bg-gradient-to-br from-red-900/50 to-orange-900/50 rounded-xl p-6 border border-red-500/30 glass-effect hover:scale-105 transition-transform duration-300"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-red-400 text-sm font-semibold">
+                  PLANETS MONITORED
+                </p>
+                <p class="text-3xl font-bold">6</p>
+              </div>
+              <div class="text-4xl">🪐</div>
+            </div>
+          </div>
+          <div
+            class="bg-gradient-to-br from-yellow-900/50 to-orange-900/50 rounded-xl p-6 border border-yellow-500/30 glass-effect hover:scale-105 transition-transform duration-300"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-yellow-400 text-sm font-semibold">
+                  TRACKED ASTEROIDS
+                </p>
+                <p class="text-3xl font-bold">4</p>
+              </div>
+              <div class="text-4xl">☄️</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fun Fact Banner -->
+        <div
+          class="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-xl p-6 border border-indigo-500/30 glass-effect"
+        >
+          <div class="flex items-center space-x-4">
+            <div class="text-4xl animate-spin-slow">✨</div>
+            <div>
+              <p
+                class="text-indigo-400 text-sm font-semibold mb-1"
+                id="fact-number"
+              >
+                SPACE FACT #1
+              </p>
+              <p class="text-lg" id="current-fact">
+                The ISS travels at 17,500 mph, completing one orbit every 93
+                minutes!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ISS Section -->
+      <div id="iss-section" class="space-y-8 animate-fadeIn hidden">
+        <h2
+          class="text-4xl font-bold text-center bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"
+        >
+          International Space Station Tracker
+        </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div
+            class="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 rounded-xl p-6 border border-cyan-500/30 glass-effect"
+          >
+            <h3 class="text-xl font-semibold mb-4 text-cyan-400">
+              Real-time Position
+            </h3>
+            <div
+              class="aspect-video bg-black/50 rounded-lg relative overflow-hidden"
+            >
+              <div
+                class="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20"
+              >
+                <div class="absolute inset-4 border border-cyan-400/50 rounded">
+                  <div
+                    id="iss-position"
+                    class="absolute w-4 h-4 bg-cyan-400 rounded-full animate-pulse"
+                    style="left: 45%; top: 30%; box-shadow: 0 0 20px #00bcd4"
+                  >
+                    <div
+                      class="absolute inset-0 bg-cyan-400 rounded-full animate-ping"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div
+              class="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 rounded-xl p-6 border border-cyan-500/30 glass-effect"
+            >
+              <h3 class="text-xl font-semibold mb-4 text-cyan-400">
+                Telemetry Data
+              </h3>
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span>Latitude:</span>
+                  <span class="font-mono text-cyan-400" id="iss-lat"
+                    >25.7617°</span
+                  >
+                </div>
+                <div class="flex justify-between items-center">
+                  <span>Longitude:</span>
+                  <span class="font-mono text-cyan-400" id="iss-lng"
+                    >-80.1918°</span
+                  >
+                </div>
+                <div class="flex justify-between items-center">
+                  <span>Altitude:</span>
+                  <span class="font-mono text-cyan-400" id="iss-alt"
+                    >408.0 km</span
+                  >
+                </div>
+                <div class="flex justify-between items-center">
+                  <span>Velocity:</span>
+                  <span class="font-mono text-cyan-400" id="iss-vel"
+                    >27600 km/h</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-gradient-to-br from-green-900/30 to-blue-900/30 rounded-xl p-6 border border-green-500/30 glass-effect"
+            >
+              <h3 class="text-xl font-semibold mb-4 text-green-400">
+                Mission Status
+              </h3>
+              <div class="space-y-2">
+                <div class="flex items-center space-x-2">
+                  <div
+                    class="w-3 h-3 bg-green-400 rounded-full animate-pulse"
+                  ></div>
+                  <span>Systems Operational</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div
+                    class="w-3 h-3 bg-green-400 rounded-full animate-pulse"
+                  ></div>
+                  <span>Communication Active</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div
+                    class="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"
+                  ></div>
+                  <span>Crew: 7 Astronauts</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Satellites Section -->
+      <div id="satellites-section" class="space-y-8 animate-fadeIn hidden">
+        <h2
+          class="text-4xl font-bold text-center bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
+        >
+          Satellite Network Monitor
+        </h2>
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          id="satellites-grid"
+        >
+          <!-- Satellites will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Planets Section -->
+      <div id="planets-section" class="space-y-8 animate-fadeIn hidden">
+        <h2
+          class="text-4xl font-bold text-center bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
+        >
+          Planetary Weather Monitoring
+        </h2>
+
+        <!-- Planet Selection -->
+        <div
+          class="flex flex-wrap justify-center gap-3 mb-8"
+          id="planet-buttons"
+        >
+          <!-- Planet buttons will be populated by JavaScript -->
+        </div>
+
+        <div id="planet-details">
+          <!-- Planet details will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Asteroids Section -->
+      <div id="asteroids-section" class="space-y-8 animate-fadeIn hidden">
+        <h2
+          class="text-4xl font-bold text-center bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent"
+        >
+          Near-Earth Asteroid Tracker
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="asteroids-grid">
+          <!-- Asteroids will be populated by JavaScript -->
+        </div>
+        <div
+          class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-xl p-6 border border-blue-500/30 glass-effect"
+        >
+          <h3 class="text-xl font-semibold mb-4 text-blue-400">
+            Asteroid Classifications
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <h4 class="font-semibold text-blue-400 mb-2">
+                Near-Earth Objects (NEOs)
+              </h4>
+              <p>
+                Asteroids and comets with orbits that bring them within 1.3 AU
+                of the Sun.
+              </p>
+            </div>
+            <div>
+              <h4 class="font-semibold text-yellow-400 mb-2">
+                Potentially Hazardous
+              </h4>
+              <p>
+                Objects larger than 140m diameter that come within 0.05 AU of
+                Earth's orbit.
+              </p>
+            </div>
+            <div>
+              <h4 class="font-semibold text-green-400 mb-2">Safe Distance</h4>
+              <p>
+                Objects that pose no immediate threat to Earth based on current
+                trajectory.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Facts Section -->
+      <div id="facts-section" class="space-y-8 animate-fadeIn hidden">
+        <h2
+          class="text-4xl font-bold text-center bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent"
+        >
+          Amazing Space Facts
+        </h2>
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          id="facts-grid"
+        >
+          <!-- Facts will be populated by JavaScript -->
+        </div>
+        <div
+          class="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl p-8 border border-purple-500/30 glass-effect text-center"
+        >
+          <h3 class="text-2xl font-bold mb-4 text-purple-400">Did You Know?</h3>
+          <p class="text-lg text-gray-300 max-w-3xl mx-auto">
+            The observable universe contains more than 2 trillion galaxies, each
+            with billions of stars. We've only begun to scratch the surface of
+            cosmic exploration!
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Data
+      const spaceFacts = [
+        "The ISS travels at 17,500 mph, completing one orbit every 93 minutes!",
+        "Venus is the hottest planet with surface temperatures of 864°F (462°C)!",
+        "One day on Mercury equals 58 Earth days and 15 hours!",
+        "Jupiter's Great Red Spot is a storm larger than Earth that's been raging for centuries!",
+        "Saturn's moon Titan has lakes and rivers of liquid methane!",
+        "A teaspoon of neutron star material would weigh about 6 billion tons!",
+        "There are more trees on Earth than stars in the Milky Way galaxy!",
+        "Space is completely silent because sound needs matter to travel through!",
+      ];
+
+      const satellites = [
+        {
+          id: "1",
+          name: "Hubble",
+          lat: 28.5,
+          lng: -80.6,
+          alt: 547,
+          status: "active",
+        },
+        {
+          id: "2",
+          name: "GPS III-5",
+          lat: 0,
+          lng: 120,
+          alt: 20200,
+          status: "active",
+        },
+        {
+          id: "3",
+          name: "Starlink-4",
+          lat: 45.2,
+          lng: -122.8,
+          alt: 550,
+          status: "active",
+        },
+        {
+          id: "4",
+          name: "GOES-17",
+          lat: 0,
+          lng: -137,
+          alt: 35786,
+          status: "maintenance",
+        },
+      ];
+
+      const planets = [
+        {
+          id: "mars",
+          name: "Mars",
+          emoji: "🔴",
+          temp: -73,
+          pressure: 6.1,
+          wind: 12.4,
+          atmosphere: "CO₂ (95%)",
+          day: "24h 37m",
+          gravity: 3.7,
+          moons: 2,
+          distance: 227.9,
+          specialty: "Sol 3945 - Late Winter",
+        },
+        {
+          id: "venus",
+          name: "Venus",
+          emoji: "💛",
+          temp: 462,
+          pressure: 9200000,
+          wind: 105,
+          atmosphere: "CO₂ (96%)",
+          day: "243d",
+          gravity: 8.9,
+          moons: 0,
+          distance: 108.2,
+          specialty: "Retrograde rotation",
+        },
+        {
+          id: "jupiter",
+          name: "Jupiter",
+          emoji: "🟤",
+          temp: -108,
+          pressure: 200000,
+          wind: 150,
+          atmosphere: "H₂ (89%)",
+          day: "9h 56m",
+          gravity: 24.8,
+          moons: 95,
+          distance: 778.5,
+          specialty: "Great Red Spot active",
+        },
+        {
+          id: "saturn",
+          name: "Saturn",
+          emoji: "🪐",
+          temp: -139,
+          pressure: 140000,
+          wind: 500,
+          atmosphere: "H₂ (96%)",
+          day: "10h 42m",
+          gravity: 10.4,
+          moons: 146,
+          distance: 1432,
+          specialty: "Ring system visible",
+        },
+        {
+          id: "neptune",
+          name: "Neptune",
+          emoji: "🔵",
+          temp: -201,
+          pressure: 100000,
+          wind: 2100,
+          atmosphere: "H₂ (80%)",
+          day: "16h 6m",
+          gravity: 11.2,
+          moons: 16,
+          distance: 4495,
+          specialty: "Fastest winds in solar system",
+        },
+        {
+          id: "titan",
+          name: "Titan",
+          emoji: "🌙",
+          temp: -179,
+          pressure: 146700,
+          wind: 0.3,
+          atmosphere: "N₂ (95%)",
+          day: "15d 22h",
+          gravity: 1.4,
+          moons: 0,
+          distance: 1432,
+          specialty: "Methane lakes & rivers",
+        },
+      ];
+
+      const asteroids = [
+        {
+          id: "1",
+          name: "2024 AA1",
+          distance: 0.052,
+          diameter: 15.2,
+          velocity: 18.7,
+          hazardous: false,
+        },
+        {
+          id: "2",
+          name: "2024 BB2",
+          distance: 0.089,
+          diameter: 45.8,
+          velocity: 22.1,
+          hazardous: true,
+        },
+        {
+          id: "3",
+          name: "2024 CC3",
+          distance: 0.134,
+          diameter: 8.9,
+          velocity: 15.3,
+          hazardous: false,
+        },
+        {
+          id: "4",
+          name: "2024 DD4",
+          distance: 0.201,
+          diameter: 120.5,
+          velocity: 28.9,
+          hazardous: true,
+        },
+      ];
+
+      // State
+      let currentSection = "overview";
+      let currentFactIndex = 0;
+      let selectedPlanet = "mars";
+      let issData = { lat: 25.7617, lng: -80.1918, alt: 408, vel: 27600 };
+
+      // Initialize
+      function init() {
+        createStars();
+        createComets();
+        populateSatellites();
+        populatePlanets();
+        populateAsteroids();
+        populateFacts();
+        startAnimations();
+      }
+
+      // Create animated stars
+      function createStars() {
+        const background = document.getElementById("space-background");
+        for (let i = 0; i < 200; i++) {
+          const star = document.createElement("div");
+          star.className = "star";
+          star.style.left = Math.random() * 100 + "%";
+          star.style.top = Math.random() * 100 + "%";
+          star.style.width = Math.random() * 3 + 1 + "px";
+          star.style.height = star.style.width;
+          star.style.opacity = Math.random() * 0.8 + 0.2;
+          star.style.animationDelay = Math.random() * 3 + "s";
+          background.appendChild(star);
+        }
+      }
+
+      // Create animated comets
+      function createComets() {
+        const background = document.getElementById("space-background");
+        for (let i = 0; i < 5; i++) {
+          const comet = document.createElement("div");
+          comet.className = "comet";
+          comet.style.left = "-10%";
+          comet.style.top = Math.random() * 100 + "%";
+          comet.style.transform = `rotate(${Math.random() * 45 + 15}deg)`;
+
+          const head = document.createElement("div");
+          head.className = "comet-head";
+          const size = Math.random() * 2 + 1;
+          head.style.width = size + "px";
+          head.style.height = size + "px";
+
+          const tail = document.createElement("div");
+          tail.className = "comet-tail";
+          tail.style.width = size * 10 + "px";
+
+          comet.appendChild(head);
+          comet.appendChild(tail);
+          background.appendChild(comet);
+        }
+      }
+
+      // Navigation
+      function showSection(section) {
+        currentSection = section;
+
+        // Hide all sections
+        document
+          .querySelectorAll('[id$="-section"]')
+          .forEach((el) => el.classList.add("hidden"));
+
+        // Show selected section
+        document
+          .getElementById(section + "-section")
+          .classList.remove("hidden");
+
+        // Update nav buttons
+        document
+          .querySelectorAll(".nav-btn, .mobile-nav-btn")
+          .forEach((btn) => {
+            btn.className = btn.className.replace(
+              /bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-lg/,
+              "hover:bg-white/10 text-gray-300 hover:text-white",
+            );
+          });
+
+        event.target.className = event.target.className.replace(
+          /hover:bg-white\/10 text-gray-300 hover:text-white/,
+          "bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-lg",
+        );
+      }
+
+      // Populate satellites
+      function populateSatellites() {
+        const grid = document.getElementById("satellites-grid");
+        grid.innerHTML = satellites
+          .map(
+            (sat) => `
+                <div class="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-500/30 glass-effect hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-purple-400">${sat.name}</h3>
+                        <div class="w-3 h-3 rounded-full ${sat.status === "active" ? "bg-green-400 animate-pulse" : sat.status === "maintenance" ? "bg-yellow-400 animate-pulse" : "bg-red-400"}"></div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span>Status:</span>
+                            <span class="capitalize font-semibold ${sat.status === "active" ? "text-green-400" : sat.status === "maintenance" ? "text-yellow-400" : "text-red-400"}">${sat.status}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Altitude:</span>
+                            <span class="text-purple-400">${sat.alt.toLocaleString()} km</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Latitude:</span>
+                            <span class="text-purple-400">${sat.lat.toFixed(2)}°</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Longitude:</span>
+                            <span class="text-purple-400">${sat.lng.toFixed(2)}°</span>
+                        </div>
+                    </div>
+                </div>
+            `,
+          )
+          .join("");
+      }
+
+      // Populate planets
+      function populatePlanets() {
+        const buttons = document.getElementById("planet-buttons");
+        buttons.innerHTML = planets
+          .map(
+            (planet) => `
+                <button onclick="selectPlanet('${planet.id}')" class="planet-btn px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 ${selectedPlanet === planet.id ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-110" : "bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white"}">
+                    <span class="text-xl">${planet.emoji}</span>
+                    <span class="font-semibold">${planet.name}</span>
+                </button>
+            `,
+          )
+          .join("");
+
+        updatePlanetDetails();
+      }
+
+      function selectPlanet(planetId) {
+        selectedPlanet = planetId;
+        populatePlanets();
+      }
+
+      function updatePlanetDetails() {
+        const planet = planets.find((p) => p.id === selectedPlanet);
+        const details = document.getElementById("planet-details");
+
+        const tempColor =
+          planet.temp > 300
+            ? "text-red-400"
+            : planet.temp > 0
+              ? "text-orange-400"
+              : planet.temp > -100
+                ? "text-blue-400"
+                : "text-cyan-400";
+        const pressure =
+          planet.pressure > 100000
+            ? `${(planet.pressure / 1000).toFixed(0)}k Pa`
+            : planet.pressure > 1000
+              ? `${(planet.pressure / 1000).toFixed(1)}k Pa`
+              : `${planet.pressure.toFixed(1)} Pa`;
+
+        details.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl p-8 border border-purple-500/30 glass-effect">
+                        <h3 class="text-2xl font-semibold mb-6 text-purple-400">Current Conditions - ${planet.name}</h3>
+                        <div class="space-y-6">
+                            <div class="text-center">
+                                <div class="text-6xl mb-2">${planet.emoji}</div>
+                                <div class="text-4xl font-bold ${tempColor}">${planet.temp}°C</div>
+                                <div class="text-lg text-gray-300">${planet.specialty}</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="text-center p-4 bg-black/30 rounded-lg">
+                                    <div class="text-2xl mb-2">💨</div>
+                                    <div class="text-lg font-semibold text-purple-400">${planet.wind} km/h</div>
+                                    <div class="text-sm text-gray-400">Wind Speed</div>
+                                </div>
+                                <div class="text-center p-4 bg-black/30 rounded-lg">
+                                    <div class="text-2xl mb-2">📊</div>
+                                    <div class="text-lg font-semibold text-purple-400">${pressure}</div>
+                                    <div class="text-sm text-gray-400">Pressure</div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="text-center p-4 bg-black/30 rounded-lg">
+                                    <div class="text-2xl mb-2">🌍</div>
+                                    <div class="text-lg font-semibold text-purple-400">${planet.gravity} m/s²</div>
+                                    <div class="text-sm text-gray-400">Gravity</div>
+                                </div>
+                                <div class="text-center p-4 bg-black/30 rounded-lg">
+                                    <div class="text-2xl mb-2">🌙</div>
+                                    <div class="text-lg font-semibold text-purple-400">${planet.moons}</div>
+                                    <div class="text-sm text-gray-400">Moons</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-500/30 glass-effect">
+                            <h3 class="text-xl font-semibold mb-4 text-purple-400">Atmospheric Data</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span>Composition:</span>
+                                    <span class="text-purple-400">${planet.atmosphere}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Day Length:</span>
+                                    <span class="text-purple-400">${planet.day}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Distance from Sun:</span>
+                                    <span class="text-purple-400">${planet.distance.toFixed(1)} million km</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Populate asteroids
+      function populateAsteroids() {
+        const grid = document.getElementById("asteroids-grid");
+        grid.innerHTML = asteroids
+          .map(
+            (ast) => `
+                <div class="rounded-xl p-6 border glass-effect hover:scale-105 transition-transform duration-300 ${ast.hazardous ? "bg-gradient-to-br from-red-900/30 to-orange-900/30 border-red-500/30" : "bg-gradient-to-br from-yellow-900/30 to-orange-900/30 border-yellow-500/30"}">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-yellow-400">${ast.name}</h3>
+                        ${ast.hazardous ? '<div class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-semibold border border-red-500/30">HAZARDOUS</div>' : ""}
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span>Distance:</span>
+                            <span class="text-yellow-400 font-mono">${ast.distance.toFixed(3)} AU</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Diameter:</span>
+                            <span class="text-yellow-400 font-mono">${ast.diameter} km</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Velocity:</span>
+                            <span class="text-yellow-400 font-mono">${ast.velocity} km/s</span>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-yellow-500/20">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 rounded-full animate-pulse ${ast.hazardous ? "bg-red-400" : "bg-green-400"}"></div>
+                                <span class="text-sm">${ast.hazardous ? "Potentially Hazardous" : "Safe Distance"}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+          )
+          .join("");
+      }
+
+      // Populate facts
+      function populateFacts() {
+        const grid = document.getElementById("facts-grid");
+        grid.innerHTML = spaceFacts
+          .map(
+            (fact, i) => `
+                <div class="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-xl p-6 border border-indigo-500/30 glass-effect hover:scale-105 transition-transform duration-300" style="animation-delay: ${i * 0.1}s">
+                    <div class="flex items-start space-x-4">
+                        <div class="text-3xl">✨</div>
+                        <div>
+                            <div class="text-indigo-400 text-sm font-semibold mb-2">FACT #${i + 1}</div>
+                            <p class="text-gray-300">${fact}</p>
+                        </div>
+                    </div>
+                </div>
+            `,
+          )
+          .join("");
+      }
+
+      // Start animations
+      function startAnimations() {
+        // Animate comets
+        setInterval(() => {
+          document.querySelectorAll(".comet").forEach((comet) => {
+            let left = parseFloat(comet.style.left);
+            left += 0.5;
+            if (left > 110) {
+              left = -10;
+              comet.style.top = Math.random() * 100 + "%";
+            }
+            comet.style.left = left + "%";
+          });
+        }, 50);
+
+        // Update ISS data
+        setInterval(() => {
+          issData.lat += (Math.random() - 0.5) * 0.1;
+          issData.lng += (Math.random() - 0.5) * 0.2;
+          issData.alt = 408 + Math.sin(Date.now() / 10000) * 5;
+          issData.vel = 27600 + Math.sin(Date.now() / 5000) * 100;
+
+          document.getElementById("iss-lat").textContent =
+            issData.lat.toFixed(4) + "°";
+          document.getElementById("iss-lng").textContent =
+            issData.lng.toFixed(4) + "°";
+          document.getElementById("iss-alt").textContent =
+            issData.alt.toFixed(1) + " km";
+          document.getElementById("iss-vel").textContent =
+            issData.vel.toFixed(0) + " km/h";
+          document.getElementById("iss-altitude").textContent =
+            issData.alt.toFixed(1) + " km";
+
+          // Update ISS position on map
+          const pos = document.getElementById("iss-position");
+          if (pos) {
+            pos.style.left = ((issData.lng + 180) / 360) * 100 + "%";
+            pos.style.top = ((90 - issData.lat) / 180) * 100 + "%";
+          }
+        }, 1000);
+
+        // Rotate facts
+        setInterval(() => {
+          currentFactIndex = (currentFactIndex + 1) % spaceFacts.length;
+          document.getElementById("current-fact").textContent =
+            spaceFacts[currentFactIndex];
+          document.getElementById("fact-number").textContent =
+            `SPACE FACT #${currentFactIndex + 1}`;
+        }, 5000);
+      }
+
+      // Initialize when page loads
+      window.addEventListener("load", init);
+    </script>
+  </body>
+</html>
